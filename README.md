@@ -1,7 +1,7 @@
-# Stream Gold Store on Stream Pay
+# Stream Gold Store on StreamPay
 
 
-This repository is a POC for testing Stream Pay / Solana Pay as well as the developer experience.
+This repository is a POC for testing StreamPay / Solana Pay as well as the developer experience.
 Nothing fancy, the code is not formatted, and just here to work quickly in a few hours of work.
 
 ## Project Description

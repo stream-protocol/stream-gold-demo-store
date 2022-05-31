@@ -11,12 +11,12 @@ export default function HeadComponent() {
         content = "#000000" / >
 
         <
-        title > Stream Pay Store < /title> <
+        title > StreamPay Store < /title> <
         meta name = "title"
-        content = "Stream Pay Store" / >
+        content = "StreamPay Store" / >
         <
         meta name = "description"
-        content = "Buy items on my store using Stream Pay!" / >
+        content = "Buy tokenized gold on store using StreamPay!" / >
         <
         /Head>
     );

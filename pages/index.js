@@ -8,8 +8,8 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 const renderNotConnectedContainer = () => ( <
     div >
     <
-    img src = "https://media0.giphy.cohttps://giphy.com/gifs/money-bar-gold-xULW8MIrFV8pyZjChim/media/LveMkKaN3KWcg/giphy.gif"
-    alt = "gold bar" /
+    img src = "https://i.imgur.com/UmH9Fko.png"
+    alt = "Stream Protocol" /
     >
     <
     div className = "button-container" >
@@ -61,7 +61,7 @@ const App = () => {
         <
         p className = "header" > Stream Gold Store < /p> <
         p className = "sub-text" >
-        The Stream Protocol is about tokenizing the asset gold in which there is transparency as to the property rights and redemption of the Gold.Stream Token gives customers the benefits of actual physical ownership of specific gold bars with the speed and mobility of a digital asset. <
+        The Stream Protocol is about tokenizing the asset gold in which there is transparency as to the property rights and redemption of the Gold. Stream Token gives customers the benefits of actual physical ownership of specific gold bars with the speed and mobility of a digital asset.<
         /p>
 
         {
