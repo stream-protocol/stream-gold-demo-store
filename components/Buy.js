@@ -7,139 +7,139 @@ import IPFSDownload from "./IpfsDownload";
 import { addOrder, hasPurchased, fetchItem } from "../lib/api";
 
 const STATUS = {
-    Initial: "Initial",
-    Submitted: "Submitted",
-    Paid: "Paid",
+  Initial: "Initial",
+  Submitted: "Submitted",
+  Paid: "Paid",
 };
 
 export default function Buy({ itemID }) {
-    const { connection } = useConnection();
-    const { publicKey, sendTransaction } = useWallet();
-    const orderID = useMemo(() => Keypair.generate().publicKey, []); // Public key used to identify the order
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
+  const orderID = useMemo(() => Keypair.generate().publicKey, []); // Public key used to identify the order
 
-    const [item, setItem] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState(STATUS.Initial);
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(STATUS.Initial);
 
-    const order = useMemo(
-        () => ({
-            buyer: publicKey.toString(),
-            orderID: orderID.toString(),
-            itemID: itemID,
-        }), [publicKey, orderID, itemID]
-    );
+  const order = useMemo(
+    () => ({
+      buyer: publicKey.toString(),
+      orderID: orderID.toString(),
+      itemID: itemID,
+    }),
+    [publicKey, orderID, itemID]
+  );
 
-    // Fetch the transaction object from the server (done to avoid tampering)
-    const processTransaction = async() => {
-        setLoading(true);
-        const txResponse = await fetch("../api/createTransaction", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(order),
-        });
-        const txData = await txResponse.json();
+  // Fetch the transaction object from the server (done to avoid tampering)
+  const processTransaction = async () => {
+    setLoading(true);
+    const txResponse = await fetch("../api/createTransaction", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    });
+    const txData = await txResponse.json();
 
-        const tx = Transaction.from(Buffer.from(txData.transaction, "base64"));
+    const tx = Transaction.from(Buffer.from(txData.transaction, "base64"));
 
-        // Attempt to send the transaction to the network
+    // Attempt to send the transaction to the network
+    try {
+      const txHash = await sendTransaction(tx, connection);
+      console.log(
+        `Transaction sent: https://solscan.io/tx/${txHash}?cluster=devnet`
+      );
+      setStatus(STATUS.Submitted);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Check if this address already has already purchased this item
+    // If so, fetch the item and set paid to true
+    // Async function to avoid blocking the UI
+    async function checkPurchased() {
+      const purchased = await hasPurchased(publicKey, itemID);
+      if (purchased) {
+        setStatus(STATUS.Paid);
+        const item = await fetchItem(itemID);
+        setItem(item);
+      }
+    }
+    checkPurchased();
+  }, [publicKey, itemID]);
+
+  useEffect(() => {
+    // Check if transaction was confirmed
+    if (status === STATUS.Submitted) {
+      setLoading(true);
+      const interval = setInterval(async () => {
         try {
-            const txHash = await sendTransaction(tx, connection);
-            console.log(
-                `Transaction sent: https://solscan.io/tx/${txHash}?cluster=devnet`
-            );
-            setStatus(STATUS.Submitted);
-        } catch (error) {
-            console.error(error);
-        } finally {
+          // Look for our orderID on the blockchain
+          const result = await findReference(connection, orderID);
+          if (
+            result.confirmationStatus === "confirmed" ||
+            result.confirmationStatus === "finalized"
+          ) {
+            clearInterval(interval);
+            setStatus(STATUS.Paid);
+            addOrder(order);
             setLoading(false);
+            alert("Thank you for your purchase!");
+          }
+        } catch (e) {
+          if (e instanceof FindReferenceError) {
+            return null;
+          }
+        } finally {
+          setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        // Check if this address already has already purchased this item
-        // If so, fetch the item and set paid to true
-        // Async function to avoid blocking the UI
-        async function checkPurchased() {
-            const purchased = await hasPurchased(publicKey, itemID);
-            if (purchased) {
-                setStatus(STATUS.Paid);
-                const item = await fetchItem(itemID);
-                setItem(item);
-            }
-        }
-        checkPurchased();
-    }, [publicKey, itemID]);
-
-    useEffect(() => {
-        // Check if transaction was confirmed
-        if (status === STATUS.Submitted) {
-            setLoading(true);
-            const interval = setInterval(async() => {
-                try {
-                    // Look for our orderID on the blockchain
-                    const result = await findReference(connection, orderID);
-                    if (
-                        result.confirmationStatus === "confirmed" ||
-                        result.confirmationStatus === "finalized"
-                    ) {
-                        clearInterval(interval);
-                        setStatus(STATUS.Paid);
-                        addOrder(order);
-                        setLoading(false);
-                        alert("Thank you for your purchase!");
-                    }
-                } catch (e) {
-                    if (e instanceof FindReferenceError) {
-                        return null;
-                    }
-                } finally {
-                    setLoading(false);
-                }
-            }, 1000);
-            return () => {
-                clearInterval(interval);
-            };
-        }
-
-        async function getItem(itemID) {
-            const item = await fetchItem(itemID);
-            setItem(item);
-        }
-
-        if (status === STATUS.Paid) {
-            getItem(itemID);
-        }
-    }, [status]);
-
-    if (!publicKey) {
-        return ( <
-            div >
-            <
-            p > You need to connect your wallet to make transactions < /p> <
-            /div>
-        );
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
     }
 
-    if (loading) {
-        return <InfinitySpin color = "gray" / > ;
+    async function getItem(itemID) {
+      const item = await fetchItem(itemID);
+      setItem(item);
     }
 
-    return ( <
-        div > { /* Display either buy button or IPFS Download component based on if Hash exists */ } {
-            item ? ( <
-                IPFSDownload hash = { item.hash }
-                filename = { item.filename }
-                />
-            ) : ( <
-                button disabled = { loading }
-                className = "buy-button"
-                onClick = { processTransaction } >
-                Buy now <
-                /button>
-            )
-        } <
-        /div>
+    if (status === STATUS.Paid) {
+      getItem(itemID);
+    }
+  }, [status]);
+
+  if (!publicKey) {
+    return (
+      <div>
+        <p>You need to connect your wallet to make transactions</p>
+      </div>
     );
+  }
+
+  if (loading) {
+    return <InfinitySpin color="gray" />;
+  }
+
+  return (
+    <div>
+      {/* Display either buy button or IPFSDownload component based on if Hash exists */}
+      {item ? (
+        <IPFSDownload hash={item.hash} filename={item.filename} />
+      ) : (
+        <button
+          disabled={loading}
+          className="buy-button"
+          onClick={processTransaction}
+        >
+          Buy now
+        </button>
+      )}
+    </div>
+  );
 }
