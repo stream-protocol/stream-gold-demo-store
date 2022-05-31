@@ -10,7 +10,7 @@ Tokenization of Physical Gold.
 
 ### Asset-Backed Token
 
-The Stream Protocol is about tokenizing the asset gold in which there is transparency as to the property rights and redemption of the Gold. $GLD Token gives customers the benefits of actual physical ownership of specific gold bars with the speed and mobility of a digital asset. Customers are able to have fractional ownership of Stream Gold NFTs, and physical bars. On the Stream Vault Platform, customers can convert their Stream "$GLD" tokens to allocated gold, unallocated gold, or fiat currency quickly and efficiently, reducing their exposure to settlement risk.
+The Stream Protocol is about tokenizing the asset gold in which there is transparency as to the property rights and redemption of the 99% pure gold. Stream Token gives customers the benefits of actual physical ownership of specific gold bars with the speed and mobility of a digital asset. Customers are able to have fractional ownership of Stream Gold NFTs, and physical bars. On the Stream Vault Platform, customers can convert their Stream tokens to allocated gold, unallocated gold, or fiat currency quickly and efficiently, reducing their exposure to settlement risk.
 
 
 ### Command lines
