@@ -128,7 +128,7 @@ export default function Buy({ itemID }) {
 
   return (
     <div>
-      {/* Display either buy button or IPFSDownload component based on if Hash exists */}
+      {/* Display either buy button or IPFS Download component based on if Hash exists */}
       {item ? (
         <IPFSDownload hash={item.hash} filename={item.filename} />
       ) : (
